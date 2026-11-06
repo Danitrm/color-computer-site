@@ -230,9 +230,6 @@ document.getElementById('checkout').onclick=()=>{const name=document.getElementB
 const mobileMenuToggle=document.getElementById('mobileMenuToggle');const mainNavigation=document.getElementById('mainNavigation');mobileMenuToggle.addEventListener('click',()=>{const open=mainNavigation.classList.toggle('is-open');mobileMenuToggle.setAttribute('aria-expanded',String(open));mobileMenuToggle.setAttribute('aria-label',open?'Fechar menu':'Abrir menu')});mainNavigation.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{mainNavigation.classList.remove('is-open');mobileMenuToggle.setAttribute('aria-expanded','false')}));document.addEventListener('keydown',e=>{if(e.key==='Escape'){mainNavigation.classList.remove('is-open');mobileMenuToggle.setAttribute('aria-expanded','false')}});
 const finishes=[{"name":"Neon Primed Blue","file":"3 Neon Primed Blue.png","color":"#40baff"},{"name":"Neon Primed Green","file":"3 Neon Primed Green.png","color":"#59e7a0"},{"name":"Imperial Red","file":"3 Imperial Red.jpeg","color":"#ff6577"},{"name":"Glacier Blue","file":"3 Glacier Blue.jpeg","color":"#a8dcff"},{"name":"Champagne Gold","file":"3 Champagne Gold.jpeg","color":"#e5c890"},{"name":"Black Piano","file":"3 Black Piano.jpeg","color":"#a5a9bb"}];
 const finishSelect=document.getElementById('finish');
-function cycleLabFinish(direction){const modelNames=['ascension','origin','skyline'];const colorNames=['metallic','matte','candy','blue','purple','neon','white','colorful'];const current=modelNames.indexOf(ccLabModel)*8+ccLabCol;const next=(current+direction+24)%24;ccLabModel=modelNames[Math.floor(next/8)];ccLabCol=next%8;renderIndividualLabPc()}
-document.getElementById('labImagePrev').addEventListener('click',()=>cycleLabFinish(-1));
-document.getElementById('labImageNext').addEventListener('click',()=>cycleLabFinish(1));
 function updateLabSummary(){const el=document.getElementById('labSummaryLines');if(!el)return;const labels={cpu:'Processador',gpu:'Placa de vídeo',ram:'Memória RAM',ssd:'Armazenamento'};el.innerHTML='<div><span>Acabamento</span><b>'+finishSelect.value+'</b></div>'+Object.entries(labels).map(([id,label])=>'<div><span>'+label+'</span><b>'+document.getElementById(id).selectedOptions[0].text+'</b></div>').join('')}
 
 const previewImage=document.getElementById('buildPcImage');
@@ -246,46 +243,52 @@ finishSelect.addEventListener('change',()=>updateFinish(finishSelect.value));
 function updateBuildSpecs(){document.getElementById('buildSpecs').innerHTML=['cpu','gpu','ram','ssd'].map(id=>'<span>'+document.getElementById(id).selectedOptions[0].text.split(' (+')[0].replace(' (base)','')+'</span>').join('')};updateLabSummary()
 ['cpu','gpu','ram','ssd'].forEach(id=>document.getElementById(id).addEventListener('change',updateBuildSpecs));
 document.getElementById('resetBuild').addEventListener('click',()=>{['cpu','gpu','ram','ssd'].forEach(id=>document.getElementById(id).selectedIndex=0);updateFinish('Glacier Blue');updateTotal();updateBuildSpecs()});
-const ccLabModels={ascension:0,origin:1,skyline:2};const ccLabColors=[{id:'metallic',name:'Prata metálico'},{id:'matte',name:'Preto fosco'},{id:'candy',name:'Vermelho candy'},{id:'blue',name:'Azul'},{id:'purple',name:'Roxo'},{id:'neon',name:'Verde neon'},{id:'white',name:'Branco'},{id:'colorful',name:'Colorido'}];let ccLabModel='ascension',ccLabCol=0;const ccLabImage=new Image();let ccLabReady=false;ccLabImage.onload=()=>{ccLabReady=true;renderIndividualLabPc()};ccLabImage.onerror=()=>{document.getElementById('chosenPcModel').textContent='Não foi possível carregar a imagem dos PCs. Atualize a página.'};ccLabImage.src='color_computer_24_cores_designs_originais.png';function renderIndividualLabPc(){const row=ccLabModels[ccLabModel],col=ccLabCol,c=ccLabColors[col];document.getElementById('buildFinishName').textContent=c.name;document.getElementById('buildColorDot').style.background=({metallic:'#b4c5d6',matte:'#313a4d',candy:'#e73a54',blue:'#2ca9ff',purple:'#a34aff',neon:'#48ef44',white:'#f2f7ff',colorful:'#e5a6ef'})[c.id];const chosen=document.getElementById('chosenPcModel');chosen.hidden=false;chosen.textContent='PC '+(row*8+col+1)+' DE 24 · '+ccLabModel.toUpperCase()+' · '+c.name.toUpperCase();document.querySelectorAll('[data-cc-lab-model]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ccLabModel===ccLabModel)));document.getElementById('ccLabFullConfigurator').href='configurar-pc.html?modelo='+ccLabModel+'&cor='+c.id;document.getElementById('labImagePrev').title='PC anterior';document.getElementById('labImageNext').title='Próximo PC';if(!ccLabReady)return;const ys=[[160,440],[510,845],[890,1230]],y=ys[row][0],h=ys[row][1]-y,cx=160+288*(col===0?6:col);const canvas=document.createElement('canvas');canvas.width=280;canvas.height=360;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,280,360);ctx.drawImage(ccLabImage,cx-105,y,210,h,22,9,236,342);previewImage.src=canvas.toDataURL('image/png');previewImage.alt='PC '+ccLabModel+' na cor '+c.name;}
-document.querySelectorAll('[data-cc-lab-model]').forEach(b=>b.addEventListener('click',()=>{ccLabModel=b.dataset.ccLabModel;renderIndividualLabPc()}));
 const chosenParams=new URLSearchParams(window.location.search);
 const colorKeys={blue:'Neon Primed Blue',green:'Neon Primed Green',red:'Imperial Red',glacier:'Glacier Blue',gold:'Champagne Gold',black:'Black Piano'};
 const modelKeys={trio:'Conjunto completo · 3 PCs',central:'PC central · 600 mm',esquerdo:'PC lateral esquerdo · 500 ou 1.000 mm',direito:'PC lateral direito · 500 ou 1.000 mm'};
 const chosenModel=modelKeys[chosenParams.get('modelo')];
 if(chosenModel){const badge=document.getElementById('chosenPcModel');badge.hidden=false;badge.textContent='MODELO ESCOLHIDO: '+chosenModel;}
-if(ccLabModels[chosenParams.get('modelo')]!==undefined)ccLabModel=chosenParams.get('modelo');const ccStartColor={metallic:0,matte:1,candy:2,blue:3,purple:4,neon:5,white:6,colorful:7};if(ccStartColor[chosenParams.get('cor')]!==undefined)ccLabCol=ccStartColor[chosenParams.get('cor')];updateFinish(colorKeys[chosenParams.get('cor')]||'Neon Primed Blue');renderIndividualLabPc();updateBuildSpecs();
+updateFinish(colorKeys[chosenParams.get('cor')]||'Neon Primed Blue');updateBuildSpecs();
 document.getElementById('year').textContent=new Date().getFullYear();
 </script><script>
 /* Recorta cada produto diretamente da prancha original, sem títulos ou legendas. */
 (function(){const source=new Image();source.onload=function(){const ys=[[160,440],[510,845],[890,1230]];document.querySelectorAll('[data-pc-row][data-pc-col]').forEach(el=>{const row=+el.dataset.pcRow,col=+el.dataset.pcCol;const cx=160+288*(col===0?6:col);const y=ys[row][0],h=ys[row][1]-y;const canvas=document.createElement('canvas');canvas.width=280;canvas.height=360;const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,280,360);ctx.drawImage(source,cx-105,y,210,h,22,9,236,342);if(col===0){const im=ctx.getImageData(0,0,280,360),p=im.data;for(let k=0;k<p.length;k+=4){if(p[k]<220||p[k+1]<220||p[k+2]<220){p[k]=Math.max(0,Math.round(p[k]*.91));p[k+1]=Math.max(0,Math.round(p[k+1]*.93));p[k+2]=Math.max(0,Math.round(p[k+2]*.96));}}ctx.putImageData(im,0,0)}el.src=canvas.toDataURL('image/png');});};source.src='color_computer_24_cores_designs_originais.png';})();
-</script><script id="cc-lab-gallery-recovery">
-/* Galeria independente: funciona mesmo que o script legado do configurador falhe. */
+</script><script id="cc-individual-pc-gallery-v2">
 (function(){
 'use strict';
 const image=document.getElementById('buildPcImage'),prev=document.getElementById('labImagePrev'),next=document.getElementById('labImageNext');
 if(!image||!prev||!next)return;
-const models=['ascension','origin','skyline'],colors=[['metallic','PRATA METÁLICO'],['matte','PRETO FOSCO'],['candy','VERMELHO CANDY'],['blue','AZUL'],['purple','ROXO'],['neon','VERDE NEON'],['white','BRANCO'],['colorful','COLORIDO']];
-const params=new URLSearchParams(location.search);let model=Math.max(0,models.indexOf(params.get('modelo'))),col=Math.max(0,colors.findIndex(c=>c[0]===params.get('cor')));
-const sheet=new Image();let loaded=false;const source='color_computer_24_cores_designs_originais.png';
+const models=['ascension','origin','skyline'];
+const colors=[['metallic','PRATA METÁLICO','#b4c5d6'],['matte','PRETO FOSCO','#313a4d'],['candy','VERMELHO CANDY','#e73a54'],['blue','AZUL','#2ca9ff'],['purple','ROXO','#a34aff'],['neon','VERDE NEON','#48ef44'],['white','BRANCO','#f2f7ff'],['colorful','COLORIDO','#e5a6ef']];
+const params=new URLSearchParams(location.search);
+let model=Math.max(0,models.indexOf(params.get('modelo'))),col=Math.max(0,colors.findIndex(c=>c[0]===params.get('cor')));
+const sheet=new Image(),ys=[[160,440],[510,845],[890,1230]];
+let loaded=false;
 function show(){
-const row=model,c=colors[col],name=models[row].toUpperCase();
-document.querySelectorAll('[data-cc-lab-model]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ccLabModel===models[row])));
-const label=document.getElementById('chosenPcModel');if(label){label.hidden=false;label.textContent='PC '+(row*8+col+1)+' DE 24 · '+name+' · '+c[1]}
-const finish=document.getElementById('buildFinishName');if(finish)finish.textContent=c[1];
-const link=document.getElementById('ccLabFullConfigurator');if(link)link.href='configurar-pc.html?modelo='+models[row]+'&cor='+c[0];
+const name=models[model].toUpperCase(),color=colors[col],label=document.getElementById('chosenPcModel');
+if(label){label.hidden=false;label.textContent='PC '+(model*8+col+1)+' DE 24 · '+name+' · '+color[1]}
+const finish=document.getElementById('buildFinishName');if(finish)finish.textContent=color[1];
+const dot=document.getElementById('buildColorDot');if(dot)dot.style.background=color[2];
+const link=document.getElementById('ccLabFullConfigurator');if(link)link.href='configurar-pc.html?modelo='+models[model]+'&cor='+color[0];
+document.querySelectorAll('[data-cc-lab-model]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.ccLabModel===models[model])));
 if(!loaded)return;
-const ys=[[160,440],[510,845],[890,1230]],y=ys[row][0],h=ys[row][1]-y,cx=160+288*(col===0?6:col);
-const canvas=document.createElement('canvas');canvas.width=280;canvas.height=360;const ctx=canvas.getContext('2d');
-ctx.fillStyle='#fff';ctx.fillRect(0,0,280,360);ctx.drawImage(sheet,cx-105,y,210,h,22,9,236,342);
-image.src=canvas.toDataURL('image/png');image.alt=name+' '+c[1];image.style.objectFit='contain';image.style.width='100%';image.style.height='100%';
+try{
+const y=ys[model][0],h=ys[model][1]-y,cx=160+288*(col===0?6:col);
+const canvas=document.createElement('canvas');canvas.width=280;canvas.height=360;
+const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,280,360);
+ctx.drawImage(sheet,cx-105,y,210,h,22,9,236,342);
+image.src=canvas.toDataURL('image/png');image.alt=name+' '+color[1];
+image.style.cssText='display:block!important;opacity:1!important;visibility:visible!important;width:100%!important;height:100%!important;object-fit:contain!important';
+}catch(err){if(label)label.textContent='Erro ao mostrar o PC. Atualize a página.'}
 }
-function step(delta){let n=(model*8+col+delta+24)%24;model=Math.floor(n/8);col=n%8;show()}
-prev.addEventListener('click',e=>{e.stopImmediatePropagation();step(-1)},true);
-next.addEventListener('click',e=>{e.stopImmediatePropagation();step(1)},true);
-document.querySelectorAll('[data-cc-lab-model]').forEach(b=>b.addEventListener('click',e=>{e.stopImmediatePropagation();model=models.indexOf(b.dataset.ccLabModel);show()},true));
+function move(n){const position=(model*8+col+n+24)%24;model=Math.floor(position/8);col=position%8;show()}
+prev.addEventListener('click',()=>move(-1));
+next.addEventListener('click',()=>move(1));
+document.querySelectorAll('[data-cc-lab-model]').forEach(btn=>btn.addEventListener('click',()=>{model=models.indexOf(btn.dataset.ccLabModel);col=0;show()}));
+document.addEventListener('cc-gallery-finish',e=>{const mapping={'Neon Primed Blue':3,'Neon Primed Green':5,'Imperial Red':2,'Glacier Blue':3,'Champagne Gold':0,'Black Piano':1};col=mapping[e.detail]??col;show()});
 sheet.onload=()=>{loaded=true;show()};
-sheet.onerror=()=>{image.src='3%20Neon%20Primed%20Blue.png';const label=document.getElementById('chosenPcModel');if(label)label.textContent='Falha ao carregar a galeria. Recarregue a página.'};
-sheet.src=source;
+sheet.onerror=()=>{const label=document.getElementById('chosenPcModel');if(label)label.textContent='Não foi possível carregar a galeria de PCs';};
+sheet.src='color_computer_24_cores_designs_originais.png';
 show();
 })();
 </script></body></html>
