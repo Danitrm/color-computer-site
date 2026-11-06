@@ -275,21 +275,12 @@ if(!loaded)return;
 try{
 const y=ys[model][0],h=ys[model][1]-y,cx=160+288*(col===0?6:col);
 const canvas=document.createElement('canvas');canvas.width=280;canvas.height=360;
-const ctx=canvas.getContext('2d',{willReadFrequently:true});
-ctx.clearRect(0,0,280,360);
+const ctx=canvas.getContext('2d');
+ctx.fillStyle='#fff';ctx.fillRect(0,0,280,360);
 ctx.drawImage(sheet,cx-105,y,210,h,22,9,236,342);
-// Retira o fundo branco/cinza conectado às bordas, preservando o gabinete colorido.
-const pixels=ctx.getImageData(0,0,280,360),data=pixels.data,w=280,hg=360;
-const seen=new Uint8Array(w*hg),queue=new Int32Array(w*hg);let head=0,tail=0;
-function isBackground(p){const k=p*4,r=data[k],g=data[k+1],b=data[k+2];return data[k+3]<10||(Math.min(r,g,b)>115&&Math.max(r,g,b)-Math.min(r,g,b)<48)}
-function enqueue(p){if(!seen[p]&&isBackground(p)){seen[p]=1;queue[tail++]=p}}
-for(let x=0;x<w;x++){enqueue(x);enqueue((hg-1)*w+x)}
-for(let y=0;y<hg;y++){enqueue(y*w);enqueue(y*w+w-1)}
-while(head<tail){const p=queue[head++],k=p*4;data[k+3]=0;const x=p%w,y=(p/w)|0;
-if(x>0)enqueue(p-1);if(x<w-1)enqueue(p+1);if(y>0)enqueue(p-w);if(y<hg-1)enqueue(p+w)}
-ctx.putImageData(pixels,0,0);
+// Sem apagar pixels: o modo multiply integra o fundo claro ao circulo azul.
 image.src=canvas.toDataURL('image/png');image.alt=name+' '+color[1];
-image.style.cssText='display:block!important;opacity:1!important;visibility:visible!important;width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important;box-shadow:none!important;border:0!important';
+image.style.cssText='display:block!important;opacity:1!important;visibility:visible!important;width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important;box-shadow:none!important;border:0!important;mix-blend-mode:multiply!important';
 }catch(err){if(label)label.textContent='Erro ao mostrar o PC. Atualize a página.'}
 }
 function move(n){const position=(model*8+col+n+24)%24;model=Math.floor(position/8);col=position%8;show()}
