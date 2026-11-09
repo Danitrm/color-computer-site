@@ -216,7 +216,7 @@ html{scroll-padding-top:96px}body{-webkit-font-smoothing:antialiased;text-render
 .cc-showcase-origin{z-index:2;animation-delay:-3s}
 .cc-showcase-skyline{z-index:2;animation-delay:-5s}
 .cc-showcase-caption{text-align:center;min-height:43px;margin-top:2px;text-shadow:0 2px 9px #02040b}
-.cc-showcase-caption strong{display:block;color:#fff;font-size:clamp(10px,1.1vw,15px);font-weight:800;letter-spacing:.23em}
+.cc-showcase-caption strong{display:block;color:#fff;font-size:clamp(9px,.8vw,12px);font-weight:800;letter-spacing:.23em}
 .cc-showcase-caption span{display:block;margin-top:6px;color:#b4d1e9;font-size:clamp(7px,.68vw,10px);letter-spacing:.17em}
 .cc-showcase-index{position:absolute;bottom:3%;right:5%;font-size:10px;letter-spacing:.27em;color:#a9c5e1}
 .hero .hero-inner{position:relative;z-index:4}
@@ -313,7 +313,7 @@ const y=ys[model][0],h=ys[model][1]-y,cx=160+288*(col===0?6:col);
 const canvas=document.createElement('canvas');canvas.width=280;canvas.height=360;
 const ctx=canvas.getContext('2d');
 ctx.fillStyle='#fff';ctx.fillRect(0,0,280,360);
-ctx.drawImage(sheet,cx-78,y,156,h,10,5,260,350);
+ctx.drawImage(sheet,cx-105,y,210,h,22,9,236,342);
 // Sem apagar pixels: o modo multiply integra o fundo claro ao circulo azul.
 image.src=canvas.toDataURL('image/png');image.alt=name+' '+color[1];
 image.style.cssText='display:block!important;opacity:1!important;visibility:visible!important;width:84%!important;height:84%!important;object-fit:contain!important;background:transparent!important;box-shadow:none!important;border:0!important;mix-blend-mode:normal!important;filter:none!important;-webkit-mask-image:none!important;mask-image:none!important';
