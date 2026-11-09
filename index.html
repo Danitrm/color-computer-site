@@ -308,7 +308,7 @@ ctx.fillStyle='#fff';ctx.fillRect(0,0,280,360);
 ctx.drawImage(sheet,cx-105,y,210,h,22,9,236,342);
 // Sem apagar pixels: o modo multiply integra o fundo claro ao circulo azul.
 image.src=canvas.toDataURL('image/png');image.alt=name+' '+color[1];
-image.style.cssText='display:block!important;opacity:1!important;visibility:visible!important;width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important;box-shadow:none!important;border:0!important;mix-blend-mode:multiply!important';
+image.style.cssText='display:block!important;opacity:1!important;visibility:visible!important;width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important;box-shadow:none!important;border:0!important;mix-blend-mode:screen!important;filter:saturate(1.18) brightness(1.10) contrast(1.06)!important';
 }catch(err){if(label)label.textContent='Erro ao mostrar o PC. Atualize a página.'}
 }
 function move(n){const position=(model*8+col+n+24)%24;model=Math.floor(position/8);col=position%8;show()}
