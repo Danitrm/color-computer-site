@@ -227,9 +227,9 @@ html{scroll-padding-top:96px}body{-webkit-font-smoothing:antialiased;text-render
 @media(prefers-reduced-motion:reduce){.cc-showcase-item{animation:none!important}}
 </style><style id="cc-lab-white-circle-v1">
 /* Vitrine branca circular: o recorte retangular se funde ao fundo sem alterar pixels dos PCs. */
-.cinematic-lab .lab-platform .lab-config-circle{background:#fff!important;border:2px solid #50cfff!important;box-shadow:0 0 0 10px #4bdfff0d,0 0 60px #287cff55,inset 0 0 26px #e4f2ff!important;isolation:isolate}
+.cinematic-lab .lab-platform .lab-config-circle{width:min(100%,540px)!important;background:#fff!important;border:2px solid #50cfff!important;box-shadow:0 0 0 10px #4bdfff0d,0 0 60px #287cff55,inset 0 0 26px #e4f2ff!important;isolation:isolate}
 .cinematic-lab .lab-platform .lab-config-circle:before{border-color:#a4c8e355!important;inset:4%!important}
-.cinematic-lab .lab-platform .lab-config-circle #buildPcImage{width:84%!important;height:84%!important;mix-blend-mode:normal!important;filter:none!important;-webkit-mask-image:none!important;mask-image:none!important}
+.cinematic-lab .lab-platform .lab-config-circle #buildPcImage{width:100%!important;height:100%!important;mix-blend-mode:normal!important;filter:none!important;-webkit-mask-image:none!important;mask-image:none!important}
 .cinematic-lab .lab-platform .lab-config-circle .cc-circle-mark{position:absolute;z-index:4;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:clamp(10px,1.1vw,15px);letter-spacing:-.12em;color:#1672ae;opacity:.75;text-shadow:0 1px 0 #b8e9ff;pointer-events:none;line-height:1}
 .cinematic-lab .lab-platform .lab-config-circle .cc-circle-mark-top{top:13%;left:13%}
 .cinematic-lab .lab-platform .lab-config-circle .cc-circle-mark-bottom{bottom:13%;right:13%}
@@ -313,10 +313,10 @@ const y=ys[model][0],h=ys[model][1]-y,cx=160+288*(col===0?6:col);
 const canvas=document.createElement('canvas');canvas.width=280;canvas.height=360;
 const ctx=canvas.getContext('2d');
 ctx.fillStyle='#fff';ctx.fillRect(0,0,280,360);
-ctx.drawImage(sheet,cx-105,y,210,h,22,9,236,342);
+const sourceWidth=150,outputHeight=350,outputWidth=Math.round(outputHeight*sourceWidth/h);ctx.drawImage(sheet,cx-sourceWidth/2,y,sourceWidth,h,(280-outputWidth)/2,5,outputWidth,outputHeight);
 // Sem apagar pixels: o modo multiply integra o fundo claro ao circulo azul.
 image.src=canvas.toDataURL('image/png');image.alt=name+' '+color[1];
-image.style.cssText='display:block!important;opacity:1!important;visibility:visible!important;width:84%!important;height:84%!important;object-fit:contain!important;background:transparent!important;box-shadow:none!important;border:0!important;mix-blend-mode:normal!important;filter:none!important;-webkit-mask-image:none!important;mask-image:none!important';
+image.style.cssText='display:block!important;opacity:1!important;visibility:visible!important;width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important;box-shadow:none!important;border:0!important;mix-blend-mode:normal!important;filter:none!important;-webkit-mask-image:none!important;mask-image:none!important';
 }catch(err){if(label)label.textContent='Erro ao mostrar o PC. Atualize a página.'}
 }
 function move(n){const position=(model*8+col+n+24)%24;model=Math.floor(position/8);col=position%8;show()}
