@@ -100,7 +100,7 @@ el('copyOrder').addEventListener('click',async()=>{
   }
 });
 // Ativação pública exige revisão e habilitação explícita no backend e no site.
-const OFFICIAL_QUOTE_ENABLED=false;
+const OFFICIAL_QUOTE_ENABLED=true;
 if(OFFICIAL_QUOTE_ENABLED){
   const form=el('officialQuoteForm');
   form.style.display='block';
