@@ -3,7 +3,7 @@
 <style>*{box-sizing:border-box}body{background:#071326;color:#eaf6ff;font:16px system-ui;margin:0;padding:24px}main{max-width:720px;margin:30px auto;border:1px solid #315276;border-radius:20px;padding:28px}h1{color:#8fe7ff}p{line-height:1.6}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0e2239;padding:16px;border-radius:12px}button,.btn{background:#79dcff;color:#061327;border:0;border-radius:10px;padding:13px 18px;font-weight:800;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.notice{padding:14px;background:#122d45;border-left:4px solid #79dcff}a{color:#8fe7ff}small{color:#b3c8db}select{background:#0e2239;color:#eaf6ff;border:1px solid #5688a9;border-radius:9px;padding:12px;margin:8px 0 14px;font:inherit}</style>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script></head>
 <body><main><h1>COLOR COMPUTER</h1><h2>Laboratório de integração do carrinho</h2>
-<p class="notice"><strong>Somente teste interno.</strong> Esta página lê o carrinho do seu navegador para conferência, mas <strong>não envia os produtos nem seus dados pessoais</strong> ao Apps Script. O envio usa exclusivamente uma solicitação fictícia e o e-mail de teste da loja.</p>
+<p class="notice"><strong>Somente teste interno.</strong> Esta página lê o carrinho do seu navegador para conferência, e permite enviar <strong>somente o resumo dos produtos</strong> ao Apps Script em um teste fictício. Não envia seu nome, e-mail ou telefone pessoal: utiliza os dados fixos de teste da loja.</p>
 <h3>Resumo completo do carrinho neste navegador</h3><pre id="preview">Carregando…</pre><p id="estimatedTotal" aria-live="polite"></p><p><a href="carrinho.html">Abrir carrinho oficial ↗</a></p>
 <h3>Simulação do pedido para o atendente</h3>
 <p>Escolha quem atenderia este orçamento. A prévia abaixo é gerada somente no seu navegador; <strong>não envia dados para a planilha nem e-mails.</strong></p>
@@ -11,12 +11,12 @@
 <select id="attendantPreview"><option value="DANIEL">Daniel</option><option value="RENAN">Renan</option></select>
 <pre id="requestPreview" aria-live="polite">Preparando simulação…</pre>
 <button type="button" id="copyPreview">Copiar resumo simulado</button><p id="copyStatus" role="status"></p>
-<h3>Teste de comunicação com o Apps Script</h3><p>O envio abaixo testa a conexão e a Cloudflare com dados fixos. Não realiza compras, pagamentos ou pedidos reais. Evite repetir se já testou hoje.</p>
+<h3>Teste de comunicação com o Apps Script</h3><p>O envio abaixo testa a conexão e a Cloudflare com o resumo dos PCs do carrinho, mas nome, telefone e e-mail fictícios/fixos da loja. Não realiza compras, pagamentos ou pedidos reais. Evite repetir se já testou hoje.</p>
 <form id="form" action="https://script.google.com/macros/s/AKfycbx_NqQYuTLy3lSAShI1WglvG23kYEyBPMOdGrgkk7P2WOjkNzBbNWe8SXvfPRlhd9Xd/exec" method="POST" target="_blank">
-<input type="hidden" name="name" value="Cliente de teste Color Computer"><input type="hidden" name="email" value="trindadedaniel591@gmail.com"><input type="hidden" name="phone" value="47999999999"><input type="hidden" name="attendant" value="DANIEL"><input type="hidden" name="summary" value="COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL"><input type="hidden" name="site_host" value="danitrm.github.io">
+<input type="hidden" name="name" value="Cliente de teste Color Computer"><input type="hidden" name="email" value="trindadedaniel591@gmail.com"><input type="hidden" name="phone" value="47999999999"><input type="hidden" id="attendantField" name="attendant" value="DANIEL"><input type="hidden" id="summaryField" name="summary" value="COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL"><input type="hidden" name="site_host" value="danitrm.github.io">
 <div style="position:absolute;left:-9999px" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>
 <div class="cf-turnstile" data-sitekey="0x4AAAAAAF7pRXefd0cT8UsK" data-callback="verified" data-expired-callback="expired" data-error-callback="failed"></div><p id="status" role="status">Aguardando verificação da Cloudflare…</p><button id="send" type="submit" disabled>Enviar apenas teste fictício</button>
-</form><p><small>O Apps Script permanece em modo de teste. Esta página não conecta ainda os dados reais do carrinho à planilha.</small></p>
+</form><p><small>O Apps Script permanece em modo de teste. Somente os detalhes dos PCs são enviados como teste, sem dados pessoais do cliente. O sistema não aceita pedidos reais.</small></p>
 </main><script>
 'use strict';
 const preview=document.getElementById('preview');
@@ -52,6 +52,7 @@ document.getElementById('estimatedTotal').textContent='Total estimado: '+money(t
 
 function updateRequestPreview(){
 const attendant=document.getElementById('attendantPreview').value;
+document.getElementById('attendantField').value=attendant;
 document.getElementById('requestPreview').textContent=resumoCarrinho
 ? 'ATENDENTE: '+attendant+'\n\n'+resumoCarrinho
 : 'Adicione um PC ao carrinho para preparar o resumo.';
@@ -69,7 +70,10 @@ function verified(){btn.disabled=false;status.textContent='Cloudflare validada. 
 function expired(){btn.disabled=true;status.textContent='Código expirou. Atualize a página.'}
 function failed(){btn.disabled=true;status.textContent='Erro na Cloudflare. Atualize a página.'}
 document.getElementById('form').addEventListener('submit',e=>{
-if(btn.disabled){e.preventDefault();return}btn.disabled=true;
+if(btn.disabled||!resumoCarrinho){e.preventDefault();status.textContent='Adicione um PC ao carrinho antes do teste.';return}
+document.getElementById('summaryField').value='COLOR COMPUTER - TESTE DE CARRINHO - SEM PEDIDO REAL\n'+resumoCarrinho;
+if(document.getElementById('summaryField').value.length>12000){e.preventDefault();status.textContent='Resumo muito longo para o teste.';return}
+btn.disabled=true;
 status.textContent='A resposta será exibida em outra aba. Esta página não confirma o registro.';
 });
 </script></body></html>
