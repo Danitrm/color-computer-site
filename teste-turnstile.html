@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Color Computer | Teste Turnstile</title>
+<style>body{background:#071326;color:#eaf6ff;font:16px system-ui;margin:0;padding:35px 20px}main{max-width:620px;margin:60px auto;padding:30px;border:1px solid #315276;border-radius:18px}h1{color:#8fe7ff}#status{margin-top:22px;line-height:1.6}small{color:#b3c8db}</style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script></head>
+<body><main><h1>COLOR COMPUTER</h1><h2>Teste privado de configuração do Turnstile</h2>
+<p>Este teste verifica apenas se o desafio da Cloudflare funciona neste domínio. <strong>Não envia pedidos, e-mails nem dados para a planilha.</strong></p>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAF7pRXefd0cT8UsK" data-callback="turnstileOk" data-expired-callback="turnstileExpired" data-error-callback="turnstileError"></div>
+<p id="status" role="status">Aguardando verificação da Cloudflare…</p>
+<small>Não copie nem compartilhe o token de verificação. Ele é temporário e deve ser validado no servidor em um teste posterior.</small>
+</main><script>
+function turnstileOk(token){document.getElementById('status').textContent=token?'✓ Turnstile respondeu corretamente no navegador. A validação no servidor ainda não foi testada.':'Verificação sem resposta.'}
+function turnstileExpired(){document.getElementById('status').textContent='A verificação expirou. Recarregue a página.'}
+function turnstileError(){document.getElementById('status').textContent='A Cloudflare não conseguiu verificar. Confira o domínio autorizado no widget.'}
+</script></body></html>
