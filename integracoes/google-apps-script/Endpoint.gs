@@ -53,13 +53,23 @@ function registrarSolicitacaoPublica_(p) {
   if (props.getProperty('COLOR_COMPUTER_TEST_MODE') !== 'ATIVO') {
     throw new Error('Modo de teste não habilitado');
   }
-  const testSummary = String(p.summary || '');
+  const testSummary = String(p.summary || '').replace(/\r\n?/g, '\n').trim();
   const isFixedTest = testSummary === 'COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL';
-  const isCartTest = testSummary.startsWith('COLOR COMPUTER - TESTE DE CARRINHO - SEM PEDIDO REAL\n') &&
-    testSummary.length <= 12000 && testSummary.includes('TOTAL ESTIMADO:');
-  if (String(p.email || '').trim().toLowerCase() !== STORE_EMAIL.toLowerCase() ||
-      String(p.name || '') !== 'Cliente de teste Color Computer' ||
-      !(isFixedTest || isCartTest)) {
+  const isCartTest = testSummary.startsWith('COLOR COMPUTER - TESTE DE CARRINHO - SEM PEDIDO REAL') &&
+    testSummary.length <= 12000 &&
+    testSummary.includes('COLOR COMPUTER') &&
+    testSummary.includes('TOTAL ESTIMADO:') &&
+    testSummary.includes('NÃO É PEDIDO CONFIRMADO');
+  const testNameOk = String(p.name || '').trim() === 'Cliente de teste Color Computer';
+  const testEmailOk = String(p.email || '').trim().toLowerCase() === STORE_EMAIL.toLowerCase();
+  if (!testNameOk || !testEmailOk || !(isFixedTest || isCartTest)) {
+    // Somente indicadores booleanos; nunca registrar dados pessoais ou tokens.
+    console.error('Diagnóstico do modo de teste: ' + JSON.stringify({
+      nameOk: testNameOk, emailOk: testEmailOk,
+      fixedSummary: isFixedTest, cartSummary: isCartTest,
+      summaryLength: testSummary.length,
+      cartPrefix: testSummary.startsWith('COLOR COMPUTER - TESTE DE CARRINHO')
+    }));
     throw new Error('Somente teste interno permitido');
   }
   if (p.website) throw new Error('Envio rejeitado');
