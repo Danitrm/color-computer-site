@@ -118,30 +118,57 @@ function registrarSolicitacaoPublica_(p) {
     props.setProperty('COLOR_COMPUTER_DAILY_COUNT_' + today, String(sentToday + 1));
     const row = sheet.getLastRow();
     const nl = String.fromCharCode(10);
+    const isTest = props.getProperty('COLOR_COMPUTER_TEST_MODE') === 'ATIVO';
+    const testLabel = isTest ? '[TESTE INTERNO — NÃO É PEDIDO REAL] ' : '';
     const clientBody = [
-      'Olá, ' + name + '!', '',
-      'Sua solicitação de orçamento foi registrada.',
-      'Protocolo: ' + protocol, '',
+      'Olá, ' + name + '! 💙', '',
+      'Recebemos sua solicitação de orçamento na COLOR COMPUTER!',
+      'Seu computador personalizado está um passo mais perto de sair do papel.', '',
+      'PROTOCOLO: ' + protocol, '',
+      'SEU ORÇAMENTO', '',
       summary, '',
-      'A equipe ainda precisa confirmar preço, disponibilidade e condições.',
-      'Não houve compra ou pagamento confirmado.',
-      'COLOR COMPUTER'
+      'TOTAL: consulte o total estimado no resumo acima.',
+      'Atendente responsável: ' + attendant, '',
+      'O QUE ACONTECE AGORA?',
+      'Nossa equipe vai analisar as configurações, verificar disponibilidade e confirmar os valores e as condições do orçamento.',
+      'Se precisarmos de alguma informação adicional, entraremos em contato pelos dados fornecidos.', '',
+      'IMPORTANTE: esta mensagem confirma apenas o recebimento da solicitação.',
+      'Nenhuma compra foi concluída e nenhum pagamento foi realizado.',
+      'Preços e disponibilidade estão sujeitos à confirmação.', '',
+      'Obrigado por escolher a COLOR COMPUTER!',
+      'COLOR COMPUTER',
+      'Seu PC. Seu estilo. Sua configuração.'
+    ].join(nl);
+    const storeBody = [
+      'NOVA SOLICITAÇÃO DE ORÇAMENTO — COLOR COMPUTER', '',
+      'Uma nova solicitação foi recebida pelo site!', '',
+      'Protocolo: ' + protocol,
+      'Atendente escolhido: ' + attendant, '',
+      'DADOS DO CLIENTE',
+      'Nome: ' + name,
+      'E-mail: ' + email,
+      'WhatsApp: ' + phone, '',
+      'PCS SOLICITADOS', '',
+      summary, '',
+      'PRÓXIMA AÇÃO',
+      'Verificar preços, compatibilidade e disponibilidade dos componentes.',
+      'Entrar em contato com o cliente para confirmar o orçamento e as condições.', '',
+      'STATUS: AGUARDANDO ANÁLISE',
+      'Solicitação de orçamento — não representa compra confirmada.',
+      'COLOR COMPUTER | SISTEMA DE ORÇAMENTOS'
     ].join(nl);
     let clientSent = false;
     let storeSent = false;
     try {
       MailApp.sendEmail({to: email,
-        subject: 'Color Computer | Solicitação ' + protocol,
+        subject: testLabel + 'Color Computer | Recebemos seu orçamento — ' + protocol,
         body: clientBody, name: 'Color Computer', replyTo: STORE_EMAIL});
       clientSent = true;
     } catch (err) { console.error('Falha no e-mail do cliente: ' + err); }
     try {
       MailApp.sendEmail({to: STORE_EMAIL,
-        subject: 'Color Computer | Novo orçamento ' + protocol + ' | ' + attendant,
-        body: ['Novo orçamento registrado', 'Protocolo: ' + protocol,
-          'Atendente: ' + attendant, 'Nome: ' + name,
-          'E-mail: ' + email, 'WhatsApp: ' + phone, '', summary].join(nl),
-        name: 'Color Computer'});
+        subject: testLabel + 'NOVO ORÇAMENTO | ' + protocol + ' | ' + attendant,
+        body: storeBody, name: 'Color Computer'});
       storeSent = true;
     } catch (err) { console.error('Falha na cópia para loja: ' + err); }
     sheet.getRange(row, 8).setValue(
