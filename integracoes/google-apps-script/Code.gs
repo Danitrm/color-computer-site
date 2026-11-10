@@ -108,3 +108,56 @@ function testarEmailDuplo() {
   });
   Logger.log('Dois e-mails de demonstração enviados para: ' + destinatario);
 }
+
+/**
+ * Etapa 2: simula o fluxo COMPLETO em ambiente privado:
+ * registra uma solicitação fictícia em uma planilha e envia dois e-mails.
+ * Execute manualmente uma vez na conta Google proprietária.
+ * Não cria endpoint público nem aceita pedidos do site.
+ */
+function testarRegistroCompleto() {
+  const emailTeste = Session.getEffectiveUser().getEmail();
+  if (!emailTeste) throw new Error('Não foi possível identificar a conta Google.');
+  const props = PropertiesService.getScriptProperties();
+  let planilha;
+  const id = props.getProperty('COLOR_COMPUTER_SHEET_ID');
+  if (id) {
+    planilha = SpreadsheetApp.openById(id);
+  } else {
+    planilha = SpreadsheetApp.create('Color Computer - Solicitações de orçamento (TESTES)');
+    props.setProperty('COLOR_COMPUTER_SHEET_ID', planilha.getId());
+  }
+  let aba = planilha.getSheetByName('Solicitacoes');
+  if (!aba) {
+    aba = planilha.insertSheet('Solicitacoes');
+    aba.appendRow(['Data', 'Protocolo', 'Nome', 'Email', 'WhatsApp', 'Atendente', 'Resumo', 'Status']);
+    aba.setFrozenRows(1);
+  }
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  let protocolo;
+  try {
+    protocolo = 'CC-TESTE-' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss') + '-' + Math.floor(Math.random() * 900 + 100);
+    const resumo = 'Modelo: ASCENSION\\nCor: Preto\\nQuantidade: 1\\nValor: apenas exemplo, sem preço real';
+    aba.appendRow([new Date(), protocolo, 'Cliente de teste', emailTeste, 'Não informado', 'DANIEL', resumo, 'TESTE — SEM PEDIDO REAL']);
+    SpreadsheetApp.flush();
+    MailApp.sendEmail({
+      to: emailTeste,
+      subject: 'Color Computer | TESTE de confirmação registrada | ' + protocolo,
+      body: ['Olá, cliente de teste!', '', 'ESTE É UM TESTE, NÃO UM PEDIDO REAL.', 'Protocolo: ' + protocolo, '', resumo, '', 'Orçamento sujeito à confirmação. Não houve compra ou pagamento.'].join('\\n'),
+      name: 'Color Computer',
+      replyTo: STORE_EMAIL
+    });
+    MailApp.sendEmail({
+      to: STORE_EMAIL,
+      subject: 'Color Computer | TESTE de registro na planilha | ' + protocolo,
+      body: ['TESTE INTERNO — NENHUM PEDIDO REAL.', 'Protocolo: ' + protocolo, 'Atendente: DANIEL', 'Cliente: Cliente de teste', 'E-mail: ' + emailTeste, '', resumo, '', 'Planilha: ' + planilha.getUrl()].join('\\n'),
+      name: 'Color Computer'
+    });
+    aba.getRange(aba.getLastRow(), 8).setValue('TESTE — 2 E-MAILS DISPARADOS');
+    Logger.log('Planilha de testes: ' + planilha.getUrl());
+    Logger.log('Protocolo de teste: ' + protocolo);
+  } finally {
+    lock.releaseLock();
+  }
+}
