@@ -48,29 +48,25 @@ function registrarSolicitacaoPublica_(p) {
   if (!sheetId || !secret || allowedHost !== 'danitrm.github.io') {
     throw new Error('Integração não configurada');
   }
-  // MODO DE TESTE: bloquear clientes reais até a integração ser aprovada.
-  // Não remova este bloqueio antes de revisar segurança, privacidade e limites.
-  if (props.getProperty('COLOR_COMPUTER_TEST_MODE') !== 'ATIVO') {
-    throw new Error('Modo de teste não habilitado');
-  }
-  const testSummary = String(p.summary || '').replace(/\r\n?/g, '\n').trim();
-  const isFixedTest = testSummary === 'COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL';
-  const isCartTest = testSummary.startsWith('COLOR COMPUTER - TESTE DE CARRINHO - SEM PEDIDO REAL') &&
-    testSummary.length <= 12000 &&
-    testSummary.includes('COLOR COMPUTER') &&
-    testSummary.includes('TOTAL ESTIMADO:') &&
-    testSummary.includes('NÃO É PEDIDO CONFIRMADO');
-  const testNameOk = String(p.name || '').trim() === 'Cliente de teste Color Computer';
-  const testEmailOk = String(p.email || '').trim().toLowerCase() === STORE_EMAIL.toLowerCase();
-  if (!testNameOk || !testEmailOk || !(isFixedTest || isCartTest)) {
-    // Somente indicadores booleanos; nunca registrar dados pessoais ou tokens.
-    console.error('Diagnóstico do modo de teste: ' + JSON.stringify({
-      nameOk: testNameOk, emailOk: testEmailOk,
-      fixedSummary: isFixedTest, cartSummary: isCartTest,
-      summaryLength: testSummary.length,
-      cartPrefix: testSummary.startsWith('COLOR COMPUTER - TESTE DE CARRINHO')
-    }));
-    throw new Error('Somente teste interno permitido');
+  // Nunca ativar produção apenas removendo a trava de teste.
+  // Produção exige duas propriedades explícitas e distintas.
+  const testMode = props.getProperty('COLOR_COMPUTER_TEST_MODE') === 'ATIVO';
+  const productionMode = !testMode &&
+    props.getProperty('COLOR_COMPUTER_PRODUCTION_MODE') === 'ATIVO' &&
+    props.getProperty('COLOR_COMPUTER_PRODUCTION_APPROVED') === 'SIM';
+  if (!testMode && !productionMode) throw new Error('Recebimento público não habilitado');
+  if (testMode) {
+    const testSummary = String(p.summary || '').replace(/\r\n?/g, '\n').trim();
+    const isFixedTest = testSummary === 'COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL';
+    const isCartTest = testSummary.startsWith('COLOR COMPUTER - TESTE DE CARRINHO - SEM PEDIDO REAL') &&
+      testSummary.length <= 12000 &&
+      testSummary.includes('TOTAL ESTIMADO:') &&
+      testSummary.includes('NÃO É PEDIDO CONFIRMADO');
+    if (String(p.email || '').trim().toLowerCase() !== STORE_EMAIL.toLowerCase() ||
+        String(p.name || '').trim() !== 'Cliente de teste Color Computer' ||
+        !(isFixedTest || isCartTest)) {
+      throw new Error('Somente teste interno permitido');
+    }
   }
   if (p.website) throw new Error('Envio rejeitado');
   if (p.site_host !== allowedHost) throw new Error('Origem inválida');
@@ -92,6 +88,13 @@ function registrarSolicitacaoPublica_(p) {
   if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
       !['DANIEL','RENAN'].includes(attendant) || summary.length < 25 ||
       !summary.startsWith('COLOR COMPUTER')) throw new Error('Dados inválidos');
+  if (productionMode && (
+      p.privacy_ack !== 'SIM' ||
+      !summary.startsWith('COLOR COMPUTER — SOLICITAÇÃO DE ORÇAMENTO') ||
+      !summary.includes('TOTAL ESTIMADO:') ||
+      !summary.includes('Não é pedido pago.') ||
+      /TESTE DE CARRINHO|TESTE DE INTEGRACAO/.test(summary)
+    )) throw new Error('Solicitação pública inválida');
   const lock = LockService.getScriptLock();
   lock.waitLock(15000);
   let protocol;
@@ -105,7 +108,8 @@ function registrarSolicitacaoPublica_(p) {
         email.toLowerCase() + '|' + summary));
     if (cache.get('cc:' + fingerprint)) throw new Error('Solicitação repetida');
     const sentToday = Number(props.getProperty('COLOR_COMPUTER_DAILY_COUNT_' + today) || 0);
-    if (sentToday >= 3 || MailApp.getRemainingDailyQuota() < 2) {
+    const dailyLimit = testMode ? 3 : 25;
+    if (sentToday >= dailyLimit || MailApp.getRemainingDailyQuota() < 2) {
       throw new Error('Limite diário atingido');
     }
     protocol = 'CC-' + today + '-' + Utilities.getUuid().slice(0, 8).toUpperCase();
@@ -118,7 +122,7 @@ function registrarSolicitacaoPublica_(p) {
     props.setProperty('COLOR_COMPUTER_DAILY_COUNT_' + today, String(sentToday + 1));
     const row = sheet.getLastRow();
     const nl = String.fromCharCode(10);
-    const isTest = props.getProperty('COLOR_COMPUTER_TEST_MODE') === 'ATIVO';
+    const isTest = testMode;
     const testLabel = isTest ? '[TESTE INTERNO — NÃO É PEDIDO REAL] ' : '';
     const clientBody = [
       'Olá, ' + name + '! 💙', '',
