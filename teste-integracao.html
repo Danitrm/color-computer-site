@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Color Computer | Teste interno do formulário</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#071326;color:#eaf6ff;font:16px system-ui;padding:30px 18px}
+main{max-width:650px;margin:35px auto;border:1px solid #315276;border-radius:20px;padding:30px}
+h1{color:#8fe7ff}p{line-height:1.6}.notice{border-left:3px solid #79dcff;padding:12px 16px;background:#112844}
+button{background:#79dcff;color:#061327;border:0;border-radius:10px;padding:14px 20px;font-weight:800;cursor:pointer;font-size:16px}
+button:disabled{opacity:.5;cursor:not-allowed}small{color:#b3c8db}#status{margin:18px 0}
+</style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body><main>
+<h1>COLOR COMPUTER</h1>
+<h2>Teste interno — envio de orçamento fictício</h2>
+<p class="notice"><strong>Somente teste.</strong> Nenhuma compra ou pagamento será realizado. O teste tenta registrar uma solicitação fictícia e enviar dois e-mails para a caixa da loja.</p>
+<p><strong>Antes de enviar:</strong> a implantação do Apps Script precisa ter a versão atualizada. Enquanto o acesso estiver em “Somente eu”, o Google pode impedir o envio a partir desta página. Não altere a permissão sem orientação.</p>
+<form id="form" action="https://script.google.com/macros/s/AKfycbx_NqQYuTLy3lSAShI1WglvG23kYEyBPMOdGrgkk7P2WOjkNzBbNWe8SXvfPRlhd9Xd/exec" method="POST" target="_blank">
+<input type="hidden" name="name" value="Cliente de teste Color Computer">
+<input type="hidden" name="email" value="trindadedaniel591@gmail.com">
+<input type="hidden" name="phone" value="47999999999">
+<input type="hidden" name="attendant" value="DANIEL">
+<input type="hidden" name="summary" value="COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL">
+<input type="hidden" name="site_host" value="danitrm.github.io">
+<div style="position:absolute;left:-10000px" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAF7pRXefd0cT8UsK" data-callback="verified" data-expired-callback="expired" data-error-callback="failed"></div>
+<p id="status" role="status">Aguardando verificação da Cloudflare…</p>
+<button id="send" type="submit" disabled>Enviar solicitação fictícia</button>
+</form>
+<p><small>O código da Cloudflare é enviado diretamente ao Apps Script, sem ser exibido na página. Cada verificação é válida para um único envio. Evite clicar mais de uma vez.</small></p>
+</main>
+<script>
+const btn=document.getElementById('send'),status=document.getElementById('status');
+function verified(){btn.disabled=false;status.textContent='Cloudflare validou. Você pode enviar o teste.'}
+function expired(){btn.disabled=true;status.textContent='Verificação expirada. Atualize a página.'}
+function failed(){btn.disabled=true;status.textContent='Falha na verificação. Atualize a página e tente novamente.'}
+document.getElementById('form').addEventListener('submit',function(e){
+if(btn.disabled){e.preventDefault();return}
+btn.disabled=true;status.textContent='Solicitação aberta em uma nova aba. Confira a resposta do Google; esta página não confirma o registro.';
+});
+</script>
+</body></html>
