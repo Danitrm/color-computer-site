@@ -48,6 +48,16 @@ function registrarSolicitacaoPublica_(p) {
   if (!sheetId || !secret || allowedHost !== 'danitrm.github.io') {
     throw new Error('Integração não configurada');
   }
+  // MODO DE TESTE: bloquear clientes reais até a integração ser aprovada.
+  // Não remova este bloqueio antes de revisar segurança, privacidade e limites.
+  if (props.getProperty('COLOR_COMPUTER_TEST_MODE') !== 'ATIVO') {
+    throw new Error('Modo de teste não habilitado');
+  }
+  if (String(p.email || '').trim().toLowerCase() !== STORE_EMAIL.toLowerCase() ||
+      String(p.name || '') !== 'Cliente de teste Color Computer' ||
+      String(p.summary || '') !== 'COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL') {
+    throw new Error('Somente teste interno permitido');
+  }
   if (p.website) throw new Error('Envio rejeitado');
   if (p.site_host !== allowedHost) throw new Error('Origem inválida');
   const token = String(p['cf-turnstile-response'] || '');
@@ -81,7 +91,7 @@ function registrarSolicitacaoPublica_(p) {
         email.toLowerCase() + '|' + summary));
     if (cache.get('cc:' + fingerprint)) throw new Error('Solicitação repetida');
     const sentToday = Number(props.getProperty('COLOR_COMPUTER_DAILY_COUNT_' + today) || 0);
-    if (sentToday >= 30 || MailApp.getRemainingDailyQuota() < 2) {
+    if (sentToday >= 3 || MailApp.getRemainingDailyQuota() < 2) {
       throw new Error('Limite diário atingido');
     }
     protocol = 'CC-' + today + '-' + Utilities.getUuid().slice(0, 8).toUpperCase();
