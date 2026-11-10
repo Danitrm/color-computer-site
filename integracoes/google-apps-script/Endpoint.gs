@@ -53,9 +53,13 @@ function registrarSolicitacaoPublica_(p) {
   if (props.getProperty('COLOR_COMPUTER_TEST_MODE') !== 'ATIVO') {
     throw new Error('Modo de teste não habilitado');
   }
+  const testSummary = String(p.summary || '');
+  const isFixedTest = testSummary === 'COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL';
+  const isCartTest = testSummary.startsWith('COLOR COMPUTER - TESTE DE CARRINHO - SEM PEDIDO REAL\n') &&
+    testSummary.length <= 12000 && testSummary.includes('TOTAL ESTIMADO:');
   if (String(p.email || '').trim().toLowerCase() !== STORE_EMAIL.toLowerCase() ||
       String(p.name || '') !== 'Cliente de teste Color Computer' ||
-      String(p.summary || '') !== 'COLOR COMPUTER - TESTE DE INTEGRACAO SEM PEDIDO REAL') {
+      !(isFixedTest || isCartTest)) {
     throw new Error('Somente teste interno permitido');
   }
   if (p.website) throw new Error('Envio rejeitado');
