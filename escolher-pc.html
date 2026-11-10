@@ -14,54 +14,14 @@
 .cc-original-grid .details{gap:9px}.cc-original-grid .details p{font-weight:600;color:#c7dff1}.cc-original-grid .focus{z-index:2}
 @media(max-width:850px){.cc-original-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:580px){.cc-original-grid{grid-template-columns:1fr}.cc-original-visual{min-height:280px}.cc-original-circle{width:min(100%,255px)}}
-</style></head><body><div class="wrap"><header><a class="brand" href="index.html">COLOR / COMPUTER</a><a class="back" href="index.html#acabamentos">← Voltar aos acabamentos</a></header><main><div class="eyebrow">COLOR COMPUTER / 24 COMBINAÇÕES ORIGINAIS</div><h1>Escolha seu design.<br><span>Encontre seu acabamento.</span></h1><p class="lead">Conheça os três computadores originais — Ascension, Origin e Skyline — em oito acabamentos cada. Escolha um modelo para configurar. As imagens vêm do catálogo original da Color Computer.</p><div class="swatches" id="colors" aria-label="Filtrar por acabamento"></div><div class="grid cc-original-grid" id="options" aria-live="polite"></div><p class="notice">24 combinações de referência: 3 modelos × 8 acabamentos. Os valores, as especificações e a disponibilidade são demonstrativos e sujeitos à confirmação.</p></main><footer>COLOR COMPUTER · Experiência de configuração demonstrativa · Sem compra ou pagamento nesta etapa.</footer></div><script>
-'use strict';
-const colors=[
-{id:'metallic',name:'Prata metálico',accent:'#b4c5d6'},
-{id:'matte',name:'Preto fosco',accent:'#59616c'},
-{id:'candy',name:'Vermelho candy',accent:'#e73a54'},
-{id:'blue',name:'Azul',accent:'#2ca9ff'},
-{id:'purple',name:'Roxo',accent:'#a34aff'},
-{id:'neon',name:'Verde neon',accent:'#48ef44'},
-{id:'white',name:'Branco',accent:'#f2f7ff'},
-{id:'colorful',name:'Dourado',accent:'#d8b269'}];
-const models=[
-{id:'ascension',name:'Ascension',desc:'Design escultural com janela de componentes e base fluida.'},
-{id:'origin',name:'Origin',desc:'Silhueta orgânica e elegante de perfil esguio.'},
-{id:'skyline',name:'Skyline',desc:'Geometria marcante, com linhas angulares e assimétricas.'}];
-const sheet=new Image();sheet.decoding='async';
-const ys=[[160,440],[510,845],[890,1230]];
-const params=new URLSearchParams(location.search);
-let active=colors.some(c=>c.id===params.get('cor'))?params.get('cor'):'all';
-function makePreview(row,col){
-  if(!sheet.complete||!sheet.naturalWidth)return null;
-  const cx=160+288*(col===0?6:col),y=ys[row][0],h=ys[row][1]-y;
-  const canvas=document.createElement('canvas');canvas.width=280;canvas.height=360;
-  const ctx=canvas.getContext('2d');if(!ctx)return null;
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,280,360);
-  ctx.drawImage(sheet,cx-105,y,210,h,22,9,236,342);
-  return canvas.toDataURL('image/png');
-}
-function render(){
-  const buttons=[{id:'all',name:'Todos os 24',accent:'#6ad9ff'},...colors];
-  document.getElementById('colors').innerHTML=buttons.map(c=>'<button type="button" aria-pressed="'+(active===c.id)+'" data-color="'+c.id+'"><span style="color:'+c.accent+'">●</span> '+c.name+'</button>').join('');
-  const cards=[];
-  models.forEach((m,row)=>colors.forEach((c,col)=>{
-    if(active!=='all'&&active!==c.id)return;
-    cards.push('<article class="option"><div class="visual cc-original-visual"><div class="cc-original-circle"><img data-row="'+row+'" data-col="'+col+'" alt="'+m.name+' — '+c.name+'" loading="lazy" width="280" height="360" src="color_computer_24_cores_designs_originais.png"></div><span class="focus">'+m.name.toUpperCase()+'</span></div><div class="details"><h2>'+m.name+'</h2><p>'+c.name+'</p><a class="choose" href="configurar-pc.html?cor='+encodeURIComponent(c.id)+'&modelo='+encodeURIComponent(m.id)+'" aria-label="Configurar '+m.name+' em '+c.name+'">CONFIGURAR ESTE PC ↗</a></div></article>');
-  }));
-  document.getElementById('options').innerHTML=cards.join('');
-  document.querySelectorAll('[data-color]').forEach(b=>b.addEventListener('click',()=>{active=b.dataset.color;const url=new URL(location.href);if(active==='all')url.searchParams.delete('cor');else url.searchParams.set('cor',active);history.replaceState(null,'',url);render()}));
-  if(sheet.complete&&sheet.naturalWidth)drawPreviews();
-}
-function drawPreviews(){
-  document.querySelectorAll('.cc-original-visual img[data-row]').forEach(img=>{
-    const preview=makePreview(Number(img.dataset.row),Number(img.dataset.col));
-    if(preview)img.src=preview;
-  });
-}
-sheet.onload=drawPreviews;
-sheet.onerror=()=>{document.querySelectorAll('.cc-original-visual img').forEach(img=>{img.alt+=' — imagem temporariamente indisponível';img.removeAttribute('src')})};
-render();
-sheet.src='color_computer_24_cores_designs_originais.png';
-</script></body></html>
+
+/* Galeria de três designs: regiões verificadas na matriz 2400×1290, sem canvas e sem zoom. */
+.cc-three-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:34px}
+.cc-three-visual{min-height:360px;padding:18px 16px 36px;background:radial-gradient(circle at center,#284866 0%,#0b1b30 78%)}
+.cc-three-art{display:flex;align-items:center;justify-content:center;width:100%;height:315px;overflow:visible}
+.cc-three-art svg{display:block;width:100%;height:100%;max-width:260px;overflow:visible;background:#f4f5f7;border-radius:16px;box-shadow:0 10px 28px #0005}
+.cc-three-grid .details p{flex:initial}
+.cc-three-grid .details .cc-three-finish{color:#84dfff;font-weight:700;font-size:12px;margin-top:auto}
+@media(max-width:900px){.cc-three-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.cc-three-grid{grid-template-columns:1fr}.cc-three-visual{min-height:325px}.cc-three-art{height:285px}}
+</style></head><body><div class="wrap"><header><a class="brand" href="index.html">COLOR / COMPUTER</a><a class="back" href="index.html#acabamentos">← Voltar aos acabamentos</a></header><main><div class="eyebrow">COLOR COMPUTER / 3 DESIGNS ORIGINAIS</div><h1>Escolha seu <span>Color Computer.</span></h1><p class="lead">Três computadores, três identidades. Veja cada design inteiro, sem cortes nas pontas ou nas bases. As imagens mostram o acabamento preto como referência; outras opções podem ser exploradas no configurador.</p><div class="grid cc-three-grid" id="options"><article class="option"><div class="visual cc-three-visual"><div class="cc-three-art"><svg viewBox="351 147 205 310" role="img" aria-label="Computador Ascension inteiro, acabamento preto, do catálogo original Color Computer" xmlns="http://www.w3.org/2000/svg"><image href="color_computer_24_cores_designs_originais.png" x="0" y="0" width="2400" height="1290" /></svg></div><span class="focus">ASCENSION</span></div><div class="details"><h2>Ascension</h2><p>Design escultural com janela de componentes e base fluida.</p><p class="cc-three-finish">Imagem de referência: acabamento preto</p><a class="choose" href="configurar-pc.html?modelo=ascension&amp;cor=matte">ESCOLHER ASCENSION ↗</a></div></article><article class="option"><div class="visual cc-three-visual"><div class="cc-three-art"><svg viewBox="363 528 176 317" role="img" aria-label="Computador Origin inteiro, acabamento preto, do catálogo original Color Computer" xmlns="http://www.w3.org/2000/svg"><image href="color_computer_24_cores_designs_originais.png" x="0" y="0" width="2400" height="1290" /></svg></div><span class="focus">ORIGIN</span></div><div class="details"><h2>Origin</h2><p>Silhueta orgânica e elegante de perfil esguio.</p><p class="cc-three-finish">Imagem de referência: acabamento preto</p><a class="choose" href="configurar-pc.html?modelo=origin&amp;cor=matte">ESCOLHER ORIGIN ↗</a></div></article><article class="option"><div class="visual cc-three-visual"><div class="cc-three-art"><svg viewBox="369 903 164 316" role="img" aria-label="Computador Skyline inteiro, acabamento preto, do catálogo original Color Computer" xmlns="http://www.w3.org/2000/svg"><image href="color_computer_24_cores_designs_originais.png" x="0" y="0" width="2400" height="1290" /></svg></div><span class="focus">SKYLINE</span></div><div class="details"><h2>Skyline</h2><p>Geometria marcante, com linhas angulares e assimétricas.</p><p class="cc-three-finish">Imagem de referência: acabamento preto</p><a class="choose" href="configurar-pc.html?modelo=skyline&amp;cor=matte">ESCOLHER SKYLINE ↗</a></div></article></div><p class="notice">Imagens originais do catálogo Color Computer. A configuração e a disponibilidade são demonstrativas e estão sujeitas a confirmação.</p></main><footer>COLOR COMPUTER · Experiência de configuração demonstrativa · Sem compra ou pagamento nesta etapa.</footer></div></body></html>
