@@ -6,10 +6,10 @@
 <body><main><h1>COLOR COMPUTER</h1><h2>Teste privado de configuração do Turnstile</h2>
 <p>Este teste verifica apenas se o desafio da Cloudflare funciona neste domínio. <strong>Não envia pedidos, e-mails nem dados para a planilha.</strong></p>
 <div class="cf-turnstile" data-sitekey="0x4AAAAAAF7pRXefd0cT8UsK" data-callback="turnstileOk" data-expired-callback="turnstileExpired" data-error-callback="turnstileError"></div>
-<p id="status" role="status">Aguardando verificação da Cloudflare…</p>
-<small>Não copie nem compartilhe o token de verificação. Ele é temporário e deve ser validado no servidor em um teste posterior.</small>
+<button type="button" id="copyToken" hidden style="background:#79dcff;color:#061327;border:0;border-radius:8px;padding:12px 16px;font-weight:700;cursor:pointer">Copiar código temporário para testar no Apps Script</button><p id="status" role="status">Aguardando verificação da Cloudflare…</p>
+<small>Não envie o código a ninguém. Ele expira em cerca de 5 minutos e só pode ser validado uma vez. Copie apenas para seu Apps Script privado.</small>
 </main><script>
-function turnstileOk(token){document.getElementById('status').textContent=token?'✓ Turnstile respondeu corretamente no navegador. A validação no servidor ainda não foi testada.':'Verificação sem resposta.'}
-function turnstileExpired(){document.getElementById('status').textContent='A verificação expirou. Recarregue a página.'}
+let tokenAtual='';function turnstileOk(token){tokenAtual=token||'';document.getElementById('copyToken').hidden=!tokenAtual;document.getElementById('status').textContent=tokenAtual?'✓ Turnstile respondeu no navegador. Copie o código temporário e valide-o no Apps Script em até 5 minutos.':'Verificação sem resposta.'}document.getElementById('copyToken').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(tokenAtual);document.getElementById('status').textContent='Código copiado! Cole no Apps Script privado e execute o teste imediatamente.'}catch(e){document.getElementById('status').textContent='Não foi possível copiar automaticamente. Tente outro navegador.'}});
+function turnstileExpired(){tokenAtual='';document.getElementById('copyToken').hidden=true;document.getElementById('status').textContent='A verificação expirou. Recarregue a página.'}
 function turnstileError(){document.getElementById('status').textContent='A Cloudflare não conseguiu verificar. Confira o domínio autorizado no widget.'}
 </script></body></html>
