@@ -110,6 +110,15 @@ for page in PAGES:
             result = subprocess.run(["node", "--check", js.name], capture_output=True, text=True)
             if result.returncode:
                 errors.append(f"{page}: inline script {index} has invalid JavaScript syntax")
+# Guard the three-stage request flow and prevent internal test messaging in checkout.
+for page in ["escolher-pc.html", "configurar-pc.html", "carrinho.html"]:
+    html = (ROOT / page).read_text(encoding="utf-8")
+    if 'aria-label="Etapas para solicitar orçamento"' not in html:
+        errors.append(f"{page}: quote journey navigation missing")
+if "INTEGRAÇÃO COM PLANILHA — TESTE INTERNO" in cart:
+    errors.append("Internal integration lab messaging exposed in customer checkout")
+if 'id="officialQuoteForm"' not in cart:
+    errors.append("Inactive integration form must remain available for future approved activation")
 if errors:
     print("FAILED static checks:")
     for error in errors:
