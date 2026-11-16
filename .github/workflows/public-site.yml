@@ -1,0 +1,21 @@
+name: Verificar site publico COLOR COMPUTER
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 11 * * *'
+  workflow_run:
+    workflows: ["Publicar Color Computer no GitHub Pages"]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  public-site-check:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout dos verificadores
+        uses: actions/checkout@v4
+      - name: Verificar paginas e imagens publicadas
+        run: python3 scripts/check_public_site.py
