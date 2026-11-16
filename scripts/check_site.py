@@ -132,6 +132,16 @@ if "productVisual(item)" not in cart or "cart-empty-cta" not in cart:
     errors.append("Cart must show original visuals and a useful empty state")
 if 'id="addToCart"' not in config or 'id="copy"' not in config:
     errors.append("Configurator actions must retain existing IDs")
+# Keyboard navigation must reach the primary content on every storefront page.
+for page in PAGES:
+    html = (ROOT / page).read_text(encoding="utf-8")
+    if 'class="cc-skip-link" href="#conteudo-principal"' not in html:
+        errors.append(f"{page}: missing skip-to-content link")
+    if '<main id="conteudo-principal" tabindex="-1"' not in html:
+        errors.append(f"{page}: missing keyboard-focusable main landmark")
+homepage = (ROOT / "index.html").read_text(encoding="utf-8")
+if "cc-mobile-navigation-phase10" not in homepage:
+    errors.append("Mobile navigation must keep model and environment links available")
 if errors:
     print("FAILED static checks:")
     for error in errors:
