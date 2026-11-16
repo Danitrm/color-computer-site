@@ -15,7 +15,7 @@ jobs:
       - name: Verificar links, imagens e seguranca comercial
         run: python3 scripts/check_site.py
   browser-smoke:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout do site
