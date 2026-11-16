@@ -12,7 +12,7 @@ const BASE = process.env.CC_TEST_BASE || 'http://127.0.0.1:8765/';
     assert.match(await page.locator('#hero-title').innerText(), /Computadores[\\s\\S]*evoluíram por dentro[\\s\\S]*A experiência também[\\s\\S]*precisa evoluir/);
     assert.equal(await page.getByRole('link', { name: /CONFIGURE O SEU/i }).getAttribute('href'), 'escolher-pc.html');
     assert.equal(await page.locator('.hero-art img').getAttribute('src'), 'ascension_01_preto.png');
-    assert.equal(await page.locator('.hero-art img').evaluate(img => img.complete && img.naturalWidth > 0), true, 'Hero original photo failed to load');
+    assert.equal(await page.locator('.hero-art img').evaluate(img => img.decode().then(() => img.naturalWidth > 0).catch(() => false)), true, 'Hero original photo failed to load');
     for (const name of ['OS MODELOS', 'AMBIENTES', 'MEU CARRINHO']) {
       assert.equal(await page.getByRole('navigation', { name: 'Navegação principal' }).getByRole('link', { name: new RegExp(name) }).isVisible(), true, name + ' hidden on mobile');
     }
