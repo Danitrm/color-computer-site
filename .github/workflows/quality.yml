@@ -1,0 +1,16 @@
+name: Verificar integridade COLOR COMPUTER
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do site
+        uses: actions/checkout@v4
+      - name: Verificar links, imagens e seguranca comercial
+        run: python3 scripts/check_site.py
