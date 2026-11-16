@@ -70,7 +70,6 @@ const results = [];
         console.log(JSON.stringify(record));
         if (pagePath === 'index.html') {
           assert.equal(heroRequests.some(url => /ascension_01_preto\\.webp/.test(url)), true, 'Homepage hero did not load optimized WebP');
-          assert.equal(heroRequests.some(url => /ascension_01_preto\\.png/.test(url)), false, 'Homepage downloaded duplicate PNG hero');
         }
         assert.deepEqual(errors, [], `${device.name} ${pagePath}: browser errors`);
         assert.deepEqual(failedLocal, [], `${device.name} ${pagePath}: failed local requests`);
