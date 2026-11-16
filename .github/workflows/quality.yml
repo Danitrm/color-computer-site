@@ -17,6 +17,7 @@ jobs:
           python3 scripts/check_site.py
           python3 -m py_compile scripts/check_public_site.py scripts/build_pages.py
           node --check scripts/audit_public_browser.cjs
+          node --check scripts/browser_deploy_artifact.cjs
       - name: Testar geracao de imagens otimizadas
         run: |
           python3 -m pip install --disable-pip-version-check Pillow==11.3.0
@@ -44,5 +45,31 @@ jobs:
       - name: Testar jornada real no navegador
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/color-computer-http.log 2>&1 &
+          node scripts/browser_smoke.cjs
+          node scripts/browser_matrix.cjs
+
+  deployed-artifact-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - name: Checkout do site
+        uses: actions/checkout@v4
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Gerar exatamente o artefato do GitHub Pages
+        run: |
+          python3 -m pip install --disable-pip-version-check Pillow==11.3.0
+          python3 scripts/build_pages.py
+      - name: Instalar Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Testar artefato publicado com navegador real
+        run: |
+          python3 -m http.server 8766 --bind 127.0.0.1 --directory _site >/tmp/color-computer-deployed-http.log 2>&1 &
+          export CC_TEST_BASE=http://127.0.0.1:8766/
+          node scripts/browser_deploy_artifact.cjs
           node scripts/browser_smoke.cjs
           node scripts/browser_matrix.cjs
