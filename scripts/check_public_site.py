@@ -61,6 +61,8 @@ def main():
     homepage = get("index.html").decode("utf-8")
     if 'type="image/webp"' not in homepage:
         raise RuntimeError("Deployed homepage missing optimized WebP picture sources")
+    if 'rel="preload" as="image" href="ascension_01_preto.webp"' not in homepage:
+        raise RuntimeError("Public hero preload does not match optimized WebP source")
     get("ascension_01_preto.webp", method="HEAD")
     if homepage.count('data-finish=') != 21:
         raise RuntimeError("Deployed homepage does not contain all 21 finish selectors")
