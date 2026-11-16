@@ -23,7 +23,11 @@ const results = [];
         const page = await context.newPage();
         const errors = [];
         const failedLocal = [];
+        const heroRequests = [];
         page.on('pageerror', error => errors.push(error.message));
+        page.on('request', request => {
+          if (request.url().includes('ascension_01_preto.')) heroRequests.push(request.url());
+        });
         page.on('response', response => {
           if (response.url().startsWith(BASE) && response.status() >= 400) {
             failedLocal.push({ status: response.status(), url: response.url() });
@@ -62,12 +66,15 @@ const results = [];
             horizontalOverflowPx: Math.max(0, Math.ceil(document.documentElement.scrollWidth - window.innerWidth)),
           };
         });
-        const record = { device: device.name, page: pagePath, status: response.status(), elapsedWallMs: Date.now() - start, ...metrics, javascriptErrors: errors, failedLocalRequests: failedLocal };
+        const record = { device: device.name, page: pagePath, status: response.status(), elapsedWallMs: Date.now() - start, ...metrics, javascriptErrors: errors, failedLocalRequests: failedLocal, heroRequests };
         results.push(record);
         if (['index.html', 'escolher-pc.html', 'carrinho.html'].includes(pagePath)) {
           await page.screenshot({ path: path.join(out, `${device.name}-${pagePath.replace('.html', '')}.png`), fullPage: true, animations: 'disabled' });
         }
         console.log(JSON.stringify(record));
+        if (pagePath === 'index.html') {
+          assert.equal(heroRequests.some(url => url.includes('ascension_01_preto.webp')), true, 'Homepage hero did not load optimized WebP');
+        }
         assert.deepEqual(errors, [], `${device.name} ${pagePath}: browser errors`);
         assert.deepEqual(failedLocal, [], `${device.name} ${pagePath}: failed local requests`);
         assert.deepEqual(metrics.brokenVisibleImages, [], `${device.name} ${pagePath}: broken visible images`);

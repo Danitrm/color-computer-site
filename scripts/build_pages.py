@@ -29,6 +29,30 @@ for original in sorted(DEST.iterdir()):
     IMAGES[original.name] = optimized.name
     saved += original.stat().st_size - optimized.stat().st_size
 
+# The homepage preloads the hero PNG in source. If the deployed <picture>
+# selects WebP, retaining that PNG preload downloads two hero images.
+# Rewrite the preload to the same optimized URL selected by <picture>.
+PRELOAD_TAG = re.compile(r'<link\b[^>]*\brel="preload"[^>]*>', re.I)
+HREF = re.compile(r'\bhref="([^"]+)"', re.I)
+preloads_rewritten = 0
+for page in DEST.glob("*.html"):
+    markup = page.read_text(encoding="utf-8")
+    def optimize_preload(match):
+        global preloads_rewritten
+        tag = match.group()
+        if not re.search(r'\bas="image"', tag, re.I):
+            return tag
+        href = HREF.search(tag)
+        if not href:
+            return tag
+        image_path = unquote(unescape(href.group(1))).split("?", 1)[0]
+        if image_path not in IMAGES:
+            return tag
+        optimized_url = quote(IMAGES[image_path], safe="-_.")
+        preloads_rewritten += 1
+        return tag[:href.start(1)] + optimized_url + tag[href.end(1):].replace('>', ' type="image/webp">', 1)
+    page.write_text(PRELOAD_TAG.sub(optimize_preload, markup), encoding="utf-8")
+
 # Wrap static image tags only. Dynamic configurator/gallery images remain PNG
 # so their existing JS selectors and browser regression checks are unaffected.
 IMAGE_TAG = re.compile(r'<img\b[^>]*>', re.I)
@@ -56,3 +80,4 @@ if modified < 4:
     raise SystemExit(f"ERROR: expected >=4 static image optimizations, got {modified}")
 print(f"Optimized {len(IMAGES)} images, saving {saved / (1024 * 1024):.2f} MiB of image bytes")
 print(f"Upgraded {modified} static HTML image elements; originals preserved")
+print(f"Rewrote {preloads_rewritten} image preloads to match WebP sources")

@@ -25,6 +25,8 @@ jobs:
           test -f _site/ascension_01_preto.png
           test -f _site/ascension_01_preto.webp
           grep -q 'type="image/webp"' _site/index.html
+          grep -q 'rel="preload" as="image" href="ascension_01_preto.webp"' _site/index.html
+          ! grep -q 'rel="preload" as="image" href="ascension_01_preto.png"' _site/index.html
   browser-smoke:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
