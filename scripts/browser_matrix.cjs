@@ -3,7 +3,7 @@
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 
-const BASE = 'http://127.0.0.1:8765/';
+const BASE = process.env.CC_TEST_BASE || 'http://127.0.0.1:8765/';
 const FINISHES = [
   ['matte', 'preto', 'Preto'],
   ['metallic', 'prata', 'Prata'],
