@@ -1,0 +1,38 @@
+name: Auditoria de desempenho do site publico
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 12 * * 1'
+  workflow_run:
+    workflows: ["Publicar Color Computer no GitHub Pages"]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+  actions: write
+jobs:
+  audit:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar navegador Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Medir o site publico e capturar telas
+        run: node scripts/audit_public_browser.cjs
+      - name: Guardar relatorio e capturas mesmo em caso de falha
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: color-computer-public-performance
+          path: performance-reports/
+          if-no-files-found: warn
+          retention-days: 30
