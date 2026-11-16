@@ -35,6 +35,28 @@ const PAGES = ['index.html', 'escolher-pc.html', 'configurar-pc.html', 'carrinho
         assert.equal(await page.locator('.cc-skip-link').count(), 1, `${path}: skip link missing at ${width}px`);
         assert.equal(await page.locator('main#conteudo-principal').count(), 1, `${path}: main missing at ${width}px`);
         const nav = page.locator('nav[aria-label="Navegação principal"]');
+        if (path === 'escolher-pc.html') {
+          const cards = page.locator('.grid .card');
+          assert.equal(await cards.count(), 3, 'Catalog must show all three original models');
+          for (const card of await cards.all()) {
+            const visual = card.locator('.visual');
+            await visual.scrollIntoViewIfNeeded();
+            const geometry = await visual.evaluate(frame => {
+              const img = frame.querySelector('img');
+              const parent = frame.getBoundingClientRect();
+              const child = img.getBoundingClientRect();
+              return {
+                inside: child.left >= parent.left - 1 && child.right <= parent.right + 1 &&
+                  child.top >= parent.top - 1 && child.bottom <= parent.bottom + 1,
+                fit: getComputedStyle(img).objectFit,
+                loaded: img.decode().then(() => img.naturalWidth > 0).catch(() => false),
+              };
+            });
+            assert.equal(geometry.inside, true, 'Catalog photo overflows its frame at ' + width + 'px');
+            assert.equal(geometry.fit, 'contain', 'Catalog must show full uncropped product photo');
+            assert.equal(await geometry.loaded, true, 'Catalog original image missing');
+          }
+        }
         if (path === 'index.html') {
           // Regression for the cut-off product photos reported by the owner.
           // The production build wraps static images in <picture>, so test both
