@@ -119,6 +119,19 @@ if "INTEGRAÇÃO COM PLANILHA — TESTE INTERNO" in cart:
     errors.append("Internal integration lab messaging exposed in customer checkout")
 if 'id="officialQuoteForm"' not in cart:
     errors.append("Inactive integration form must remain available for future approved activation")
+# Cart gallery must only reference known original product photographs.
+cart_photos = re.search(r'const PRODUCT_PHOTOS=({.*?});', cart, re.S)
+if not cart_photos:
+    errors.append("Cart gallery photo map missing")
+else:
+    for images in IMAGES.values():
+        for filename in images:
+            if f"'{filename}'" not in cart_photos.group(1):
+                errors.append(f"Cart gallery missing original photo: {filename}")
+if "productVisual(item)" not in cart or "cart-empty-cta" not in cart:
+    errors.append("Cart must show original visuals and a useful empty state")
+if 'id="addToCart"' not in config or 'id="copy"' not in config:
+    errors.append("Configurator actions must retain existing IDs")
 if errors:
     print("FAILED static checks:")
     for error in errors:
