@@ -79,4 +79,5 @@ if not IMAGES:
 if modified < 4:
     raise SystemExit(f"ERROR: expected >=4 static image optimizations, got {modified}")
 print(f"Optimized {len(IMAGES)} images, saving {saved / (1024 * 1024):.2f} MiB of image bytes")
-print(f"Upgraded {modified} static HTML image elements; originals preserved")\nprint(f"Rewrote {preloads_rewritten} image preloads to match WebP sources")
+print(f"Upgraded {modified} static HTML image elements; originals preserved")
+print(f"Rewrote {preloads_rewritten} image preloads to match WebP sources")
