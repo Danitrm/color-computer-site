@@ -1,7 +1,7 @@
 // Browser-level smoke checks for the real storefront, without sending messages or orders.
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
-const BASE = 'http://127.0.0.1:8765/';
+const BASE = process.env.CC_TEST_BASE || 'http://127.0.0.1:8765/';
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
