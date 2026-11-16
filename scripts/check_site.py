@@ -102,7 +102,7 @@ for page in PAGES:
     html = (ROOT / page).read_text(encoding="utf-8")
     for index, script in enumerate(re.findall(r'<script\\b([^>]*)>([\\s\\S]*?)</script>', html, re.I), 1):
         attributes, code = script
-        if not code.strip() or re.search(r'type\\s*=\\s*["\\']application/(?:ld\\+json|json)["\\']', attributes, re.I):
+        if not code.strip() or "application/ld+json" in attributes or "application/json" in attributes:
             continue
         with tempfile.NamedTemporaryFile(mode="w", suffix=".js", encoding="utf-8") as js:
             js.write(code)
