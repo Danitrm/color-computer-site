@@ -32,15 +32,15 @@ for original in sorted(DEST.iterdir()):
 # The homepage preloads the hero PNG in source. If the deployed <picture>
 # selects WebP, retaining that PNG preload downloads two hero images.
 # Rewrite the preload to the same optimized URL selected by <picture>.
-PRELOAD_TAG = re.compile(r'<link\\b[^>]*\\brel="preload"[^>]*>', re.I)
-HREF = re.compile(r'\\bhref="([^"]+)"', re.I)
+PRELOAD_TAG = re.compile(r'<link\b[^>]*\brel="preload"[^>]*>', re.I)
+HREF = re.compile(r'\bhref="([^"]+)"', re.I)
 preloads_rewritten = 0
 for page in DEST.glob("*.html"):
     markup = page.read_text(encoding="utf-8")
     def optimize_preload(match):
         global preloads_rewritten
         tag = match.group()
-        if not re.search(r'\\bas="image"', tag, re.I):
+        if not re.search(r'\bas="image"', tag, re.I):
             return tag
         href = HREF.search(tag)
         if not href:
