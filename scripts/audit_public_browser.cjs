@@ -22,9 +22,13 @@ const results = [];
       for (const pagePath of PAGES) {
         const page = await context.newPage();
         const errors = [];
-        const failedLocal = [];\n        const heroRequests = [];
+        const failedLocal = [];
+        const heroRequests = [];
         page.on('pageerror', error => errors.push(error.message));
-        page.on('request', request => {\n          if (/\\/ascension_01_preto\\.(?:png|webp)(?:\\?|$)/.test(request.url())) heroRequests.push(request.url());\n        });\n        page.on('response', response => {
+        page.on('request', request => {
+          if (request.url().includes('ascension_01_preto.')) heroRequests.push(request.url());
+        });
+        page.on('response', response => {
           if (response.url().startsWith(BASE) && response.status() >= 400) {
             failedLocal.push({ status: response.status(), url: response.url() });
           }
@@ -69,7 +73,7 @@ const results = [];
         }
         console.log(JSON.stringify(record));
         if (pagePath === 'index.html') {
-          assert.equal(heroRequests.some(url => /ascension_01_preto\\.webp/.test(url)), true, 'Homepage hero did not load optimized WebP');
+          assert.equal(heroRequests.some(url => url.includes('ascension_01_preto.webp')), true, 'Homepage hero did not load optimized WebP');
         }
         assert.deepEqual(errors, [], `${device.name} ${pagePath}: browser errors`);
         assert.deepEqual(failedLocal, [], `${device.name} ${pagePath}: failed local requests`);
