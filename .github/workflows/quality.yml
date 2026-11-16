@@ -16,7 +16,7 @@ jobs:
         run: python3 scripts/check_site.py
   browser-smoke:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout do site
         uses: actions/checkout@v4
@@ -32,3 +32,4 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/color-computer-http.log 2>&1 &
           node scripts/browser_smoke.cjs
+          node scripts/browser_matrix.cjs
