@@ -41,20 +41,21 @@ const PAGES = ['index.html', 'escolher-pc.html', 'configurar-pc.html', 'carrinho
           for (const card of await cards.all()) {
             const visual = card.locator('.visual');
             await visual.scrollIntoViewIfNeeded();
-            const geometry = await visual.evaluate(frame => {
+            const geometry = await visual.evaluate(async frame => {
               const img = frame.querySelector('img');
+              const loaded = await img.decode().then(() => img.naturalWidth > 0).catch(() => false);
               const parent = frame.getBoundingClientRect();
               const child = img.getBoundingClientRect();
               return {
                 inside: child.left >= parent.left - 1 && child.right <= parent.right + 1 &&
                   child.top >= parent.top - 1 && child.bottom <= parent.bottom + 1,
                 fit: getComputedStyle(img).objectFit,
-                loaded: img.decode().then(() => img.naturalWidth > 0).catch(() => false),
+                loaded,
               };
             });
             assert.equal(geometry.inside, true, 'Catalog photo overflows its frame at ' + width + 'px');
             assert.equal(geometry.fit, 'contain', 'Catalog must show full uncropped product photo');
-            assert.equal(await geometry.loaded, true, 'Catalog original image missing');
+            assert.equal(geometry.loaded, true, 'Catalog original image missing');
           }
         }
         if (path === 'index.html') {
