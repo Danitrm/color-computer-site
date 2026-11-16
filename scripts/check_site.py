@@ -5,6 +5,8 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 import re
 import sys
+import subprocess
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = ["index.html", "escolher-pc.html", "configurar-pc.html",
@@ -93,9 +95,24 @@ if "fetchpriority=\"high\"" not in homepage:
 # Ensure product photography is not accidentally rendered as a composite crop.
 if "color_computer_24_cores_designs_originais.png" in homepage:
     errors.append("Homepage must use individual product images, not a composite")
+# Parse inline JavaScript with Node.js so syntax errors cannot silently ship.
+for page in PAGES:
+    if not (ROOT / page).is_file():
+        continue
+    html = (ROOT / page).read_text(encoding="utf-8")
+    for index, script in enumerate(re.findall(r'<script\\b([^>]*)>([\\s\\S]*?)</script>', html, re.I), 1):
+        attributes, code = script
+        if not code.strip() or re.search(r'type\\s*=\\s*["\\']application/(?:ld\\+json|json)["\\']', attributes, re.I):
+            continue
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".js", encoding="utf-8") as js:
+            js.write(code)
+            js.flush()
+            result = subprocess.run(["node", "--check", js.name], capture_output=True, text=True)
+            if result.returncode:
+                errors.append(f"{page}: inline script {index} has invalid JavaScript syntax")
 if errors:
     print("FAILED static checks:")
     for error in errors:
         print(" -", error)
     sys.exit(1)
-print("PASS: links, anchors, image alt, 21 product choices, hero priority, quote safety, cart key")
+print("PASS: links, anchors, image alt, 21 product choices, JS syntax, hero priority, quote safety, cart key")
