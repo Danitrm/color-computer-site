@@ -59,6 +59,9 @@ def main():
             raise RuntimeError(f"{path}: deployed page is missing expected navigation landmarks")
         print(f"PASS: live page {path}")
     homepage = get("index.html").decode("utf-8")
+    if 'type="image/webp"' not in homepage:
+        raise RuntimeError("Deployed homepage missing optimized WebP picture sources")
+    get("ascension_01_preto.webp", method="HEAD")
     if homepage.count('data-finish=') != 21:
         raise RuntimeError("Deployed homepage does not contain all 21 finish selectors")
     if 'cc-interactive-colors-script' not in homepage:
