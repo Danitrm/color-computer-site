@@ -15,7 +15,15 @@ jobs:
       - name: Verificar links, imagens e seguranca comercial
         run: |
           python3 scripts/check_site.py
-          python3 -m py_compile scripts/check_public_site.py
+          python3 -m py_compile scripts/check_public_site.py scripts/build_pages.py
+      - name: Testar geracao de imagens otimizadas
+        run: |
+          python3 -m pip install --disable-pip-version-check Pillow==11.3.0
+          python3 scripts/build_pages.py
+          test -f _site/index.html
+          test -f _site/ascension_01_preto.png
+          test -f _site/ascension_01_preto.webp
+          grep -q 'type="image/webp"' _site/index.html
   browser-smoke:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
