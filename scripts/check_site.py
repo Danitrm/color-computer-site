@@ -77,9 +77,25 @@ if "const OFFICIAL_QUOTE_ENABLED=false;" not in cart:
     errors.append("Unverified automatic quote form must stay disabled")
 if "colorComputerCartV1" not in cart or "colorComputerCartV1" not in config:
     errors.append("Shared cart storage key changed")
+# Verify all interactive color selections map to the correct original photos.
+homepage = (ROOT / "index.html").read_text(encoding="utf-8")
+color_ids = ["matte", "metallic", "colorful", "blue", "rose", "neon", "candy"]
+for model, images in IMAGES.items():
+    for color_id, image in zip(color_ids, images):
+        if f'data-finish="{color_id}" data-img="{image}"' not in homepage:
+            errors.append(f"Missing interactive {model} / {color_id}: {image}")
+    if f'data-configure="{model}"' not in homepage:
+        errors.append(f"Missing configuration link for {model}")
+if homepage.count('data-finish="') != 21:
+    errors.append("Homepage must expose exactly 21 original color choices")
+if "fetchpriority=\"high\"" not in homepage:
+    errors.append("Hero product image is not prioritized")
+# Ensure product photography is not accidentally rendered as a composite crop.
+if "color_computer_24_cores_designs_originais.png" in homepage:
+    errors.append("Homepage must use individual product images, not a composite")
 if errors:
     print("FAILED static checks:")
     for error in errors:
         print(" -", error)
     sys.exit(1)
-print("PASS: local links, anchors, image alt text, 21 original images, quote safety, cart key")
+print("PASS: links, anchors, image alt, 21 product choices, hero priority, quote safety, cart key")
