@@ -16,6 +16,7 @@ jobs:
         run: |
           python3 scripts/check_site.py
           python3 -m py_compile scripts/check_public_site.py scripts/build_pages.py
+          node --check scripts/audit_public_browser.cjs
       - name: Testar geracao de imagens otimizadas
         run: |
           python3 -m pip install --disable-pip-version-check Pillow==11.3.0
