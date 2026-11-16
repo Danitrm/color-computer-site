@@ -36,6 +36,28 @@ const PAGES = ['index.html', 'escolher-pc.html', 'configurar-pc.html', 'carrinho
         assert.equal(await page.locator('main#conteudo-principal').count(), 1, `${path}: main missing at ${width}px`);
         const nav = page.locator('nav[aria-label="Navegação principal"]');
         if (path === 'index.html') {
+          // Regression for the cut-off product photos reported by the owner.
+          // The production build wraps static images in <picture>, so test both
+          // source and deployed layouts at every responsive viewport.
+          for (const card of await page.locator('.product').all()) {
+            const media = card.locator('.product-media');
+            await media.scrollIntoViewIfNeeded();
+            const image = media.locator('img');
+            assert.equal(await image.evaluate(img => img.decode().then(() => img.naturalWidth > 0).catch(() => false)), true, 'Product photo failed to decode');
+            const geometry = await media.evaluate(frame => {
+              const img = frame.querySelector('img');
+              const outer = frame.getBoundingClientRect();
+              const inner = img.getBoundingClientRect();
+              const style = getComputedStyle(img);
+              return {
+                contained: inner.left >= outer.left - 1 && inner.top >= outer.top - 1 && inner.right <= outer.right + 1 && inner.bottom <= outer.bottom + 1,
+                fit: style.objectFit,
+                ratio: img.naturalWidth / img.naturalHeight,
+              };
+            });
+            assert.equal(geometry.contained, true, 'Product image box escapes its frame at ' + width + 'px');
+            assert.equal(geometry.fit, 'contain', 'Product photo must never be cropped');
+          }
           for (const label of ['OS MODELOS', 'AMBIENTES', 'MEU CARRINHO']) {
             assert.equal(await nav.getByRole('link', { name: new RegExp(label) }).isVisible(), true, `${label} hidden at ${width}px`);
           }
