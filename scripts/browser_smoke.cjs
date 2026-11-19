@@ -15,6 +15,11 @@ const BASE = process.env.CC_TEST_BASE || 'http://127.0.0.1:8765/';
     assert.equal(await page.getByRole('link', { name: /Rolar até os modelos/i }).getAttribute('href'), '#modelos');
     assert.equal(await page.locator('.hero-aura').count(), 1);
     assert.equal(await page.locator('#cc-hero-stage').count(), 1);
+    assert.equal(await page.locator('#cc-ascension-luxury-motion').count(), 1, 'Luxury motion styles must be present');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    assert.equal(await page.locator('#cc-hero-stage img').evaluate(img => getComputedStyle(img).animationName), 'none', 'Reduced-motion users must not see product motion');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    assert.ok((await page.locator('#cc-hero-stage img').evaluate(img => getComputedStyle(img).animationName)).includes('cc-luxury-float'), 'Luxury floating animation missing');
     assert.equal(await page.locator('.hero-art img').getAttribute('src'), 'ascension_01_preto.png');
     assert.equal(await page.locator('.hero-art img').evaluate(img => img.decode().then(() => img.naturalWidth > 0).catch(() => false)), true, 'Hero original photo failed to load');
     for (const name of ['OS MODELOS', 'AMBIENTES', 'MEU CARRINHO']) {
