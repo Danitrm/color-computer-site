@@ -10,8 +10,11 @@ const BASE = process.env.CC_TEST_BASE || 'http://127.0.0.1:8765/';
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
     const heroHeadline = await page.locator('#hero-title').innerText();
-    for (const phrase of ['Computadores', 'evoluíram por dentro.', 'A experiência também', 'precisa evoluir.']) assert.ok(heroHeadline.includes(phrase), 'Missing cinematic headline phrase: ' + phrase);
+    for (const phrase of ['Não é apenas', 'um computador.', 'É uma presença.']) assert.ok(heroHeadline.includes(phrase), 'Missing immersive headline phrase: ' + phrase);
     assert.equal(await page.getByRole('link', { name: /CONFIGURE O SEU/i }).getAttribute('href'), 'escolher-pc.html');
+    assert.equal(await page.getByRole('link', { name: /Rolar até os modelos/i }).getAttribute('href'), '#modelos');
+    assert.equal(await page.locator('.hero-aura').count(), 1);
+    assert.equal(await page.locator('#cc-hero-stage').count(), 1);
     assert.equal(await page.locator('.hero-art img').getAttribute('src'), 'ascension_01_preto.png');
     assert.equal(await page.locator('.hero-art img').evaluate(img => img.decode().then(() => img.naturalWidth > 0).catch(() => false)), true, 'Hero original photo failed to load');
     for (const name of ['OS MODELOS', 'AMBIENTES', 'MEU CARRINHO']) {
